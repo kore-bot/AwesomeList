@@ -38,6 +38,8 @@ Selector: `python scripts/selector.py --gpu r9700 --count 1`
   `unverified` · RDNA4 · vLLM · 1 benchmark record · [card →](../projects/vllm-radlight.md)
 - **[malicz/vllm-gfx1201-launchers](https://github.com/malicz/vllm-gfx1201-launchers)** — Single-R9700 Radiance + MXFP4 setup — Dockerfile, model download, MTP conversion and patches. Built by **malicz**.<br>
   `unverified` · RDNA4 · vLLM · 1 benchmark record · [card →](../projects/malicz-gfx1201-launchers.md)
+- **[SlyBase/vllm-sly-radiance](https://github.com/SlyBase/vllm-sly-radiance)** — The fastest single-card R9700 image — vLLM with hand-written MXFP4 kernels, DFlash2 and full 262k context on one 32 GB RDNA4 card. Built by **tf1rst**.<br>
+  `unverified` · RDNA4 · vLLM · [card →](../projects/vllm-sly-radiance.md)
 - **[StillDeadcode/libr4d](https://codeberg.org/StillDeadcode/libr4d)** — gfx1201-specialized HIP kernel library (pure HIP, llama.cpp-friendly). Built by **Deadcode**.<br>
   `unverified` · RDNA4 · llama.cpp · [card →](../projects/libr4d.md)
 - **[StillDeadcode/vllm-radiance](https://codeberg.org/StillDeadcode/vllm-radiance)** — The Radiance vLLM image for gfx1201 — the base most community R9700 forks build on. Built by **Deadcode**.<br>
