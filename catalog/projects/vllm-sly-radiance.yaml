@@ -9,9 +9,10 @@ audience: operator
 description: >
   A vLLM image for gfx1201 (RDNA4) built to make one 32 GB card with one MXFP4 model as fast
   as it gets: native MXFP4 W4A8 GEMM, fused norm/quant, DFlash2 speculative decoding with a
-  W4A16 drafter, and the full 262k context on a single R9700. Reference run (image 1.0.0, 300 W):
-  ~136 tok/s single-stream decode, ~3,100 tok/s prefill (2,635 at 47k), 461 tok/s at 8 concurrent
-  requests, 437k-token KV pool. Every number measured with BetterBench.
+  W4A16 drafter, and the full 262k context on a single R9700. Reference run (image 1.5.1,
+  300 W, fp8 KV cache): ~150 tok/s single-stream decode, ~3,000 tok/s prefill (2,430 at 47k),
+  503 tok/s at 8 concurrent requests, 439k-token KV pool; the opt-in 4-bit KV cache holds
+  767k tokens at ~3 % less decode. Every number measured with BetterBench.
 links:
   repository: https://github.com/SlyBase/vllm-sly-radiance
   docker_image: https://ghcr.io/slybase/vllm-sly-radiance
@@ -27,7 +28,7 @@ software:
   runtimes: [vllm]
   container: true
   rocm: "10.1"
-  stack_notes: "As stated by the author (image 1.1.0): ROCm 10.1, torch 2.13.0 / triton 3.8.0 / torchvision 0.28.0 (AMD +rocm10.1.0 wheels), vLLM 0.31.0 built from source, aiter 0.1.23, transformers 5.17.0; libr4d kernels plus this repo's MXFP4 W4A8 GEMM and attention tunes."
+  stack_notes: "As stated by the author (image 1.6.0): ROCm 10.1, torch 2.13.0 / triton 3.8.0 / torchvision 0.28.0 (AMD +rocm10.1.0 wheels), vLLM 0.31.0 built from source, aiter 0.1.23, transformers 5.17.0; libr4d kernels plus this repo's MXFP4 W4A8 GEMM and attention tunes."
   based_on: [vllm-radiance]
 provides: [openai_api, continuous_batching, speculative_decoding, dflash, custom_kernels, long_context]
 supports:
@@ -38,13 +39,20 @@ supports:
   quantizations: [mxfp4, nvfp4, w4a16]
   topologies: [single_gpu]
 quick_start: |
-  docker pull ghcr.io/slybase/vllm-sly-radiance:1.1.0-rocm10.1
+  docker pull ghcr.io/slybase/vllm-sly-radiance:1.6.0-rocm10.1
 known_issues:
   - TP 2/3/4/8 paths are included in the image but untested (single-card focus).
+evidence:
+  - sly-radiance-r9700-qwen38-27b-mxfp4-single
+  - sly-radiance-r9700-qwen38-27b-mxfp4-conc8
+  - sly-radiance-r9700-qwen38-27b-mxfp4-prefill-47k
 notes: >
   Also serves NVFP4, compressed-tensors INT4, ParoQuant, AutoRound and escha checkpoints on the
-  same card (see docs/BENCHMARKS.md). Multi-GPU guidance in docs/MULTI-GPU.md.
+  same card (see docs/BENCHMARKS.md). Multi-GPU guidance in docs/MULTI-GPU.md. Reference numbers
+  are the author's image 1.5.1 run of 2026-10-17 (300 W, production arguments, BetterBench 0.4.0);
+  image 1.6.0 ships the same defaults, with nucleus speculative decoding and a wide prefill tile
+  opt-in. The repo's own README still pins the 1.1.0 tag in its pull line while VERSION is 1.6.0.
 verification:
   level: author_reported
-  last_verified: "2026-10-07"
+  last_verified: "2026-10-20"
   listed_since: "2026-10-11"

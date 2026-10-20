@@ -240,7 +240,7 @@ Currently: 1 supported, 2 experimental, 33 unverified.
 - **[hifi/vllm-radlight](https://codeberg.org/hifi/vllm-radlight)** — Lightweight vLLM variant; median decode above 70 t/s on one R9700 with Qwen3.8-27B at 192K context. Built by **hifi**.<br>
   `unverified` · RDNA4 · vLLM · 1 benchmark record · [card →](docs/projects/vllm-radlight.md)
 - **[SlyBase/vllm-sly-radiance](https://github.com/SlyBase/vllm-sly-radiance)** — The fastest single-card R9700 image — vLLM with hand-written MXFP4 kernels, DFlash2 and full 262k context on one 32 GB RDNA4 card. Built by **tf1rst**.<br>
-  `unverified` · RDNA4 · vLLM · [card →](docs/projects/vllm-sly-radiance.md)
+  `unverified` · RDNA4 · vLLM · 3 benchmark records · [card →](docs/projects/vllm-sly-radiance.md)
 - **[StillDeadcode/vllm-radiance](https://codeberg.org/StillDeadcode/vllm-radiance)** — The Radiance vLLM image for gfx1201 — the base most community R9700 forks build on. Built by **Deadcode**.<br>
   `unverified` · RDNA4 · vLLM · [card →](docs/projects/vllm-radiance.md)
 - **[tonyd2wild/Minimax-M3-NVFP-3x-DGX-Sparks-TP-3](https://github.com/tonyd2wild/Minimax-M3-NVFP-3x-DGX-Sparks-TP-3)** — MiniMax-M3 NVFP4 across 3× DGX Spark with tensor parallelism 3. Built by **tonyd2wild**, shared by @The_Candle_Watcher.<br>

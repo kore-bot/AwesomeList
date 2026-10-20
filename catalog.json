@@ -2198,7 +2198,7 @@
       ],
       "maturity": "unverified",
       "audience": "operator",
-      "description": "A vLLM image for gfx1201 (RDNA4) built to make one 32 GB card with one MXFP4 model as fast as it gets: native MXFP4 W4A8 GEMM, fused norm/quant, DFlash2 speculative decoding with a W4A16 drafter, and the full 262k context on a single R9700. Reference run (image 1.0.0, 300 W): ~136 tok/s single-stream decode, ~3,100 tok/s prefill (2,635 at 47k), 461 tok/s at 8 concurrent requests, 437k-token KV pool. Every number measured with BetterBench.\n",
+      "description": "A vLLM image for gfx1201 (RDNA4) built to make one 32 GB card with one MXFP4 model as fast as it gets: native MXFP4 W4A8 GEMM, fused norm/quant, DFlash2 speculative decoding with a W4A16 drafter, and the full 262k context on a single R9700. Reference run (image 1.5.1, 300 W, fp8 KV cache): ~150 tok/s single-stream decode, ~3,000 tok/s prefill (2,430 at 47k), 503 tok/s at 8 concurrent requests, 439k-token KV pool; the opt-in 4-bit KV cache holds 767k tokens at ~3 % less decode. Every number measured with BetterBench.\n",
       "links": {
         "repository": "https://github.com/SlyBase/vllm-sly-radiance",
         "docker_image": "https://ghcr.io/slybase/vllm-sly-radiance"
@@ -2228,7 +2228,7 @@
         ],
         "container": true,
         "rocm": "10.1",
-        "stack_notes": "As stated by the author (image 1.1.0): ROCm 10.1, torch 2.13.0 / triton 3.8.0 / torchvision 0.28.0 (AMD +rocm10.1.0 wheels), vLLM 0.31.0 built from source, aiter 0.1.23, transformers 5.17.0; libr4d kernels plus this repo's MXFP4 W4A8 GEMM and attention tunes.",
+        "stack_notes": "As stated by the author (image 1.6.0): ROCm 10.1, torch 2.13.0 / triton 3.8.0 / torchvision 0.28.0 (AMD +rocm10.1.0 wheels), vLLM 0.31.0 built from source, aiter 0.1.23, transformers 5.17.0; libr4d kernels plus this repo's MXFP4 W4A8 GEMM and attention tunes.",
         "based_on": [
           "vllm-radiance"
         ]
@@ -2258,14 +2258,19 @@
           "single_gpu"
         ]
       },
-      "quick_start": "docker pull ghcr.io/slybase/vllm-sly-radiance:1.1.0-rocm10.1\n",
+      "quick_start": "docker pull ghcr.io/slybase/vllm-sly-radiance:1.6.0-rocm10.1\n",
       "known_issues": [
         "TP 2/3/4/8 paths are included in the image but untested (single-card focus)."
       ],
-      "notes": "Also serves NVFP4, compressed-tensors INT4, ParoQuant, AutoRound and escha checkpoints on the same card (see docs/BENCHMARKS.md). Multi-GPU guidance in docs/MULTI-GPU.md.\n",
+      "evidence": [
+        "sly-radiance-r9700-qwen38-27b-mxfp4-single",
+        "sly-radiance-r9700-qwen38-27b-mxfp4-conc8",
+        "sly-radiance-r9700-qwen38-27b-mxfp4-prefill-47k"
+      ],
+      "notes": "Also serves NVFP4, compressed-tensors INT4, ParoQuant, AutoRound and escha checkpoints on the same card (see docs/BENCHMARKS.md). Multi-GPU guidance in docs/MULTI-GPU.md. Reference numbers are the author's image 1.5.1 run of 2026-10-17 (300 W, production arguments, BetterBench 0.4.0); image 1.6.0 ships the same defaults, with nucleus speculative decoding and a wide prefill tile opt-in. The repo's own README still pins the 1.1.0 tag in its pull line while VERSION is 1.6.0.\n",
       "verification": {
         "level": "author_reported",
-        "last_verified": "2026-10-07",
+        "last_verified": "2026-10-20",
         "listed_since": "2026-10-11"
       },
       "_card_url": "https://github.com/launch80/AwesomeList/blob/main/docs/projects/vllm-sly-radiance.md",
@@ -2617,6 +2622,125 @@
         "recorded_on": "2026-09-24"
       },
       "notes": "Aggregate across 8 concurrent streams after @wsantos's prefill-blocking fix."
+    },
+    {
+      "id": "sly-radiance-r9700-qwen38-27b-mxfp4-conc8",
+      "project": "vllm-sly-radiance",
+      "mode": "batched",
+      "hardware": {
+        "gpu_model": "r9700",
+        "gpu_count": 1
+      },
+      "platform": {
+        "rocm": "10.1"
+      },
+      "runtime": {
+        "name": "vllm",
+        "version": "1.5.1",
+        "speculative": "DFlash2 k=7 + prompt lookup, Cactus delta 0.5"
+      },
+      "model": {
+        "name": "Qwen 3.8 27B Quark-AWQ-MXFP4",
+        "artifact": "amd/Qwen3.8-27B-Quark-AWQ-MXFP4",
+        "family": "qwen3",
+        "quantization": "mxfp4"
+      },
+      "workload": {
+        "context_length": 262144,
+        "concurrency": 8,
+        "tool": "BetterBench 0.4.0 default config"
+      },
+      "metrics": {
+        "decode_tok_s": 503,
+        "statistic": "mean"
+      },
+      "measured_on": "2026-10-17",
+      "source": {
+        "type": "repository",
+        "url": "https://github.com/SlyBase/vllm-sly-radiance#performance",
+        "recorded_on": "2026-10-20"
+      },
+      "notes": "Aggregate decode over 8 concurrent requests (48 requests per level). One R9700, 300 W, fp8 KV cache."
+    },
+    {
+      "id": "sly-radiance-r9700-qwen38-27b-mxfp4-prefill-47k",
+      "project": "vllm-sly-radiance",
+      "mode": "single_stream",
+      "hardware": {
+        "gpu_model": "r9700",
+        "gpu_count": 1
+      },
+      "platform": {
+        "rocm": "10.1"
+      },
+      "runtime": {
+        "name": "vllm",
+        "version": "1.5.1",
+        "speculative": "DFlash2 k=7 + prompt lookup, Cactus delta 0.5"
+      },
+      "model": {
+        "name": "Qwen 3.8 27B Quark-AWQ-MXFP4",
+        "artifact": "amd/Qwen3.8-27B-Quark-AWQ-MXFP4",
+        "family": "qwen3",
+        "quantization": "mxfp4"
+      },
+      "workload": {
+        "context_length": 262144,
+        "prompt_tokens": 47000,
+        "concurrency": 1,
+        "tool": "BetterBench 0.4.0 prefill sweep, unique prompts"
+      },
+      "metrics": {
+        "prefill_tok_s": 2430,
+        "ttft_ms": 19400,
+        "statistic": "mean"
+      },
+      "measured_on": "2026-10-17",
+      "source": {
+        "type": "repository",
+        "url": "https://github.com/SlyBase/vllm-sly-radiance#performance",
+        "recorded_on": "2026-10-20"
+      },
+      "notes": "47k-depth point of the 1.5k-47k prefill sweep; 2,430 tok/s, time to first token 19.4 s."
+    },
+    {
+      "id": "sly-radiance-r9700-qwen38-27b-mxfp4-single",
+      "project": "vllm-sly-radiance",
+      "mode": "single_stream",
+      "hardware": {
+        "gpu_model": "r9700",
+        "gpu_count": 1
+      },
+      "platform": {
+        "rocm": "10.1"
+      },
+      "runtime": {
+        "name": "vllm",
+        "version": "1.5.1",
+        "speculative": "DFlash2 k=7 + prompt lookup, Cactus delta 0.5"
+      },
+      "model": {
+        "name": "Qwen 3.8 27B Quark-AWQ-MXFP4",
+        "artifact": "amd/Qwen3.8-27B-Quark-AWQ-MXFP4",
+        "family": "qwen3",
+        "quantization": "mxfp4"
+      },
+      "workload": {
+        "context_length": 262144,
+        "concurrency": 1,
+        "tool": "BetterBench 0.4.0 default config"
+      },
+      "metrics": {
+        "decode_tok_s": 149.6,
+        "statistic": "mean"
+      },
+      "measured_on": "2026-10-17",
+      "source": {
+        "type": "repository",
+        "url": "https://github.com/SlyBase/vllm-sly-radiance#performance",
+        "recorded_on": "2026-10-20"
+      },
+      "notes": "Weighted over 8 task categories, warm engine. One R9700, 300 W, fp8 KV cache, production arguments."
     },
     {
       "id": "vllm-mxfp4-r9700-qwen38-27b-nvfp4",
